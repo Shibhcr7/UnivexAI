@@ -73,16 +73,18 @@
             chatBody.scrollTop = chatBody.scrollHeight;
 
             try {
-                // Absolute URL pointing directly to your local Node server
-                const response = await fetch('http://localhost:5000/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ messages: [{ role: 'user', content: message }], mode: currentMode })
-                });
+  // Absolute URL pointing directly to your Render live backend
+                 const response = await fetch('https://univexai.onrender.com/api/generate', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ messages: [{ role: 'user', content: message }], mode: currentMode })
+  });
 
-                if (!response.ok) {
-                    throw new Error('Server returned an error');
-                }
+  if (!response.ok) {
+    throw new Error('Server returned an error');
+  }
+
+  // Next steps for processing response stream...
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
