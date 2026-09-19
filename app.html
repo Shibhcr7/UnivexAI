@@ -74,11 +74,12 @@
 
             try {
   // Absolute URL pointing directly to your Render live backend
-                 const response = await fetch('https://univexai.onrender.com/api/generate', {
-                 method: 'POST',
-                 headers: { 'Content-Type': 'application/json' },
-                 body: JSON.stringify({ messages: [{ role: 'user', content: message }], mode: currentMode })
-  });
+// Make sure /api/generate is at the end of the URL
+const response = await fetch('https://univexai.onrender.com/api/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ messages: [{ role: 'user', content: message }], mode: currentMode })
+});
 
   if (!response.ok) {
     throw new Error('Server returned an error');
