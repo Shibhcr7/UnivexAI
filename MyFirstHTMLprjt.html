@@ -1,0 +1,91 @@
+<html>
+<head>
+    <title>Bat and Ball Game</title>
+    <style>
+        #game-container {
+            width: 400px;
+            margin: 40px auto;
+            border: 1px solid black;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        #game-container .bat {
+            width: 20px;
+            height: 20px;
+            background-color: black;
+            border-radius: 50%;
+            margin: 10px;
+        }
+        
+        #game-container .ball {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            margin: 10px;
+        }
+        
+        #game-container .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px;
+        }
+        
+        #game-container .score-1 {
+            color: green;
+        }
+        
+        #game-container .score-2 {
+            color: red;
+        }
+        
+        #game-container .score-3 {
+            color: yellow;
+        }
+        
+        #game-container .score-4 {
+            color: blue;
+        }
+        
+        #game-container .score-5 {
+            color: purple;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="bat"></div>
+        <div class="ball"></div>
+        <div class="score">
+            <span class="score-1">0</span>
+            <span class="score-2">0</span>
+            <span class="score-3">0</span>
+            <span class="score-4">0</span>
+            <span class="score-5">0</span>
+        </div>
+        <div class="score-6"></div>
+    </div>
+    
+    <script>
+        let bat = document.querySelector('.bat');
+        let ball = document.querySelector('.ball');
+        let score = document.querySelectorAll('.score');
+        let score1 = document.querySelector('.score-1');
+        let score2 = document.querySelector('.score-2');
+        let score3 = document.querySelector('.score-3');
+        let score4 = document.querySelector('.score-4');
+        let score5 = document.querySelector('.score-5');
+        let score6 = document.querySelector('.score-6');
+        
+        let score1Value = 0;
+        let score2Value = 0;
+        let score3Value = 0;
+        let score4Value = 0;
+        let score5Value = 0;
+        
+        bat.addEventListener('click', function() {
+            if (score1.textContent === '0') {
+                score1Value = 1;
+                score1.textContent = score1Value;
+            } else if (score1.textContent === score
