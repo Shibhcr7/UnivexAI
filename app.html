@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Univex AI Interface</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #121214; color: #e1e1e6; display: flex; height: 100vh; overflow: hidden; }
+
+        .sidebar { width: 260px; background-color: #18181b; padding: 20px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #27272a; }
+        .logo { font-size: 24px; font-weight: bold; color: #ec4899; margin-bottom: 20px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 8px; color: #a1a1aa; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .nav-item:hover, .nav-item.active { background-color: #0284c7; color: #fff; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .header { height: 60px; border-bottom: 1px solid #27272a; display: flex; align-items: center; padding: 0 25px; background-color: #18181b; font-weight: 600; }
+
+        .chat-body { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        .chat-message { max-width: 80%; padding: 14px 18px; border-radius: 10px; font-size: 15px; line-height: 1.5; white-space: pre-wrap; }
+        .user-msg { background-color: #27272a; align-self: flex-end; }
+        .ai-msg { background-color: #1f2937; align-self: flex-start; border: 1px solid #374151; }
+
+        .input-container { padding: 20px 30px; background-color: #18181b; border-top: 1px solid #27272a; display: flex; gap: 12px; }
+        .chat-input { flex: 1; background-color: #27272a; border: 1px solid #3f3f46; border-radius: 20px; padding: 12px 20px; color: #fff; font-size: 14px; outline: none; }
+        .send-btn { background-color: #0284c7; border: none; width: 42px; height: 42px; border-radius: 50%; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">Univex AI</div>
+        <div class="nav-item active" onclick="setMode('general', this)">💬 General Chat</div>
+        <div class="nav-item" onclick="setMode('planes', this)">✈️ Aeroplanes</div>
+        <div class="nav-item" onclick="setMode('rockets', this)">🚀 Rockets</div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">Univex Assistant</div>
+
+        <div class="chat-body" id="chat-body">
+            <div class="chat-message ai-msg">Hello! I am Univex AI. How can I help you today?</div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Ask a question..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="send-btn" onclick="sendMessage()">➔</button>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'general';
+
+        function setMode(mode, el) {
+            currentMode = mode;
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatBody = document.getElementById('chat-body');
+            chatBody.innerHTML += `<div class="chat-message user-msg">${message}</div>`;
+            input.value = '';
+
+            const responseBox = document.createElement('div');
+            responseBox.className = 'chat-message ai-msg';
+            responseBox.innerText = '...';
+            chatBody.appendChild(responseBox);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            try {
+                // Absolute URL pointing directly to your local Node server
+                const response = await fetch('http://localhost:5000/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: [{ role: 'user', content: message }], mode: currentMode })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Server returned an error');
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                responseBox.innerText = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const dataStr = line.replace('data: ', '').trim();
+                            if (dataStr === '[DONE]') break;
+                            try {
+                                const parsed = JSON.parse(dataStr);
+                                if (parsed.token) responseBox.innerText += parsed.token;
+                                if (parsed.error) responseBox.innerText = parsed.error;
+                            } catch (e) {}
+                        }
+                    }
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }
+            } catch (err) {
+                responseBox.innerText = 'Error connecting to server. Make sure "node server.js" is running in terminal.';
+            }
+        }
+    </script>
+</body>
+</html>
